@@ -1,0 +1,3 @@
+(main ((create counting ({Int})) (create producer (counting))  ))
+(producer ( (become producer (counting)) (received increment ()) (received result ({Int}))))
+(counting ( (become counting ({Int})) (received increment ()) (received retrieve (producer))))

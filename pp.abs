@@ -1,0 +1,3 @@
+(main ((create pong ({Int})) (create ping ({Int} pong))  ))
+(ping ( (become ping ({Int} pong)) (received start ()) (received send-pong ()) (received ping ())))
+(pong ( (become pong ({Int})) (received send-ping (ping)) (received stop ())))

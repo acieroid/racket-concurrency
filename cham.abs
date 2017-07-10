@@ -1,0 +1,3 @@
+(main ((create mall (#f {Int} {Int} {Int})) (create chameneo (mall {Int} #f {Int})) (create chameneo (mall {Int} {Sym} {Int}))  ))
+(mall ( (become mall (#f {Int} {Int} {Int})) (become mall (chameneo {Int} {Int} {Int})) (received meet (#f chameneo)) (received meet ({Sym} chameneo)) (received meeting-count ({Int} chameneo)) (received meet (#f chameneo))))
+(chameneo ( (become chameneo (mall {Int} #f {Int})) (become chameneo (mall {Int} {Sym} {Int})) (received exit (mall)) (received meet (#f chameneo)) (received meet (Sym chameneo)) (received change (#f))))

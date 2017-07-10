@@ -1,0 +1,31 @@
+#lang racket
+(define (read-from-file file)
+  (call-with-input-file file
+    (lambda (in)
+      (define result (make-hash))
+      (define (loop)
+        (let ((entry (read in)))
+          (if (eof-object? entry)
+              result
+              (begin
+                (hash-set! result (car entry) (list->set (cadr entry)))
+                (loop)))))
+      (loop))))
+(define concrete-results (read-from-file (vector-ref (current-command-line-arguments) 0)))
+(define abstract-results (read-from-file (vector-ref (current-command-line-arguments) 1)))
+(define match #t)
+(when (not (equal? concrete-results abstract-results))
+  (define keys (hash-keys concrete-results))
+  (for-each
+   (lambda (k)
+     (let ((c (hash-ref concrete-results k (set)))
+           (a (hash-ref abstract-results k (set))))
+       (when (not (set=? c a))
+         (set! match #f)
+         ; (printf "mismatch for actor ~a: ~a (conc.) vs. ~a (abs.) ~n" k c a)
+         ; (printf "conc - abs = ~a~n" (set-subtract c a))
+         (printf "overapproximates ~a element(s) on actor ~a~n" (set-count (set-subtract a c)) k)
+         (when (not (set-empty? (set-subtract c a)))
+           (printf "UNSOUND~n")))))
+   keys))
+(printf "result: ~a~n" match)

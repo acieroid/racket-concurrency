@@ -1,0 +1,3 @@
+(main ((create sink ({Int} #f)) (create big ({Int} {Int} sink {Int} #f))  ))
+(sink ( (become sink ({Int} #f)) (become sink ({Int} "#<vector>")) (received neighbors ("#<vector>")) (received exit ())))
+(big ( (become big ({Int} {Int} sink {Int} #f)) (become big ({Int} {Int} sink {Int} "#<vector>")) (received neighbors ("#<vector>")) (received pong ({Int})) (received ping ({Int})) (received exit ())))
