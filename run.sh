@@ -1,29 +1,36 @@
 #!/bin/sh
 
-ITERATIONS=100
+ITERATIONS=10
 
 run() {
     echo === $1 ===
-    rm $1.conc
+    echo > $1.conc
     for i in $(seq $ITERATIONS); do
+        gecho -ne "Iteration $i/$ITERATIONS\r"
         racket $1.rkt | gawk '// { if (logging==1) { print $0 } } /exiting/ { logging=1 }' >> $1.conc
         if [ $? == 130 ]; then
            exit
         fi
-        racket compare.rkt $1.conc $1.abs | grep -v "result: #t"
-        if [ $? == 130 ]; then
-            exit
-        fi
     done
+    racket compare.rkt $1.conc $1.abs
+    if [ $? == 130 ]; then
+        exit
+    fi
 }
 
-run pp # good (0 overapproximations, no unsound)
-run count # good (0 overapproximations, no unsound)
-run fjt # good (0 overapproximations, no unsound)
-run fjc # good (0 overapproximations, no unsound)
-run thr # good (2 overapproximations every time)
-run cham # good (5 overapproximations every time)
-run big # good (2 overapproximations every time)
+# run pp # 0
+# run count # 0
+# run fjt # 0
+# run fjc # 0
+# run thr # 2
+# run cham # 5
+# run big # 2
 
-run cdict # good (1 overapproximation every time)
-run csll # good (1 overapproximation every time)
+# run cdict # 1
+# run csll # 1
+# run pcbb TODO
+# run phil # 0
+# run sbar # 0
+# run cig # 1
+# run logm # TODO: implement
+# run btx # 1

@@ -1,0 +1,4 @@
+(main ((create counter ({Int})) (create abritrator ("#<vector>" {Int})) (create philosopher ({Int} {Int} {Int}))  ))
+(philosopher ( (become philosopher ({Int} {Int} {Int})) (received start ()) (received eat ()) (received denied ())))
+(abritrator ( (become abritrator ("#<vector>" {Int})) (received hungry (philosopher {Int})) (received done ({Int})) (received exit ())))
+(counter ( (become counter ({Int})) (received add ({Int}))))

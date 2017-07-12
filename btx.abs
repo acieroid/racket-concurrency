@@ -1,0 +1,3 @@
+(main ((create teller ("#<vector>" {Int})) (create account ({Int} {Int}))  ))
+(teller ( (become teller ("#<vector>" {Int})) (received start ()) (received reply ())))
+(account ( (become account ({Int} {Int})) (received credit ({Int} teller #f)) (received credit ({Int} teller account)) (received debit ({Int} teller)) (received stop ())))

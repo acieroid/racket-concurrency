@@ -1,0 +1,3 @@
+(main ((create arbitrator (#f {Int}))  ))
+(arbitrator ((create smoker (arbitrator)) (become arbitrator (#f {Int})) (become arbitrator ("#<vector>" {Int})) (received create-smokers ()) (received start ()) (received started-smoking ())))
+(smoker ( (become smoker (arbitrator)) (received start-smoking ({Int})) (received exit ())))

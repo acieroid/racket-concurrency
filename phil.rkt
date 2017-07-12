@@ -1,0 +1,62 @@
+#lang racket
+(require "actors.rkt")
+(define Rounds (int-top))
+(define NumForks (int-top))
+(define NumPhilosophers NumForks)
+(define counter
+  (a/actor "counter" (n)
+           (add (m) (a/become counter (+ n m)))
+           (finish () (display n) (a/terminate))))
+(define arbitrator
+  (a/actor "abritrator" (forks num-exited)
+           (hungry (p id)
+                   (let ((left id) (right (modulo (+ id 1) NumForks)))
+                     (if (or (vector-ref forks left) (vector-ref forks right))
+                         (begin
+                           (a/send p denied))
+                         (begin
+                           ;; Modeled as side effects, probably not the best thing to do...
+                           ;; but since there is only one arbitrator, that should be fine
+                           (vector-set! forks left #t)
+                           (vector-set! forks right #t)
+                           (a/send p eat))))
+                   (a/become arbitrator forks num-exited))
+           (done (id)
+                 (let ((left id) (right (modulo (+ id 1) NumForks)))
+                   (vector-set! forks left #f)
+                   (vector-set! forks right #f))
+                 (a/become arbitrator forks num-exited))
+           (exit ()
+                 (if (= (+ num-exited 1) NumForks)
+                     (a/terminate)
+                     (a/become arbitrator forks (+ num-exited 1))))))
+(define philosopher
+  (a/actor "philosopher" (id rounds-so-far local-counter)
+           (denied ()
+                   (a/send arbitrator-actor hungry a/self id)
+                   (a/become philosopher id rounds-so-far (+ local-counter 1)))
+           (eat ()
+                (a/send counter-actor add local-counter)
+                (sleep 0.1)
+                (a/send arbitrator-actor done id)
+                (if (< (+ rounds-so-far 1) Rounds)
+                    (begin
+                      ;; was: (a/send self start)
+                      (a/send arbitrator-actor hungry a/self id)
+                      (a/become philosopher id (+ rounds-so-far 1) local-counter))
+                    (begin
+                      (a/send arbitrator-actor exit)
+                      (a/terminate))))
+           (start ()
+                  (a/send arbitrator-actor hungry a/self id)
+                  (a/become philosopher id rounds-so-far local-counter))))
+(define counter-actor (a/create counter 0))
+(define arbitrator-actor (a/create arbitrator (make-vector NumForks #f) 0))
+(define (create-philosophers i)
+  (if (= i NumPhilosophers)
+      #t
+      (let ((p (a/create philosopher i 0 0)))
+        (a/send p start)
+        (create-philosophers (+ i 1)))))
+(create-philosophers 0)
+(a/wait)

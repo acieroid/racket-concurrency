@@ -1,0 +1,67 @@
+#lang racket
+(require "actors.rkt")
+(define NumAccounts (+ 2 (int-top)))
+(define NumBankings (int-top))
+(define InitialBalance (int-top))
+
+(define (build-vector n f)
+  (letrec ((v (make-vector n #f))
+           (loop (lambda (i)
+                   (if (< i n)
+                       (begin
+                         (vector-set! v i (f i))
+                         (loop (+ i 1)))
+                       v))))
+    (loop 0)))
+(define (vector-foreach f v)
+  (letrec ((loop (lambda (i)
+                   (if (< i (vector-length v))
+                       (begin
+                         (f (vector-ref v i))
+                         (loop (+ i 1)))
+                       'done))))
+    (loop 0)))
+
+(define teller
+  (a/actor "teller" (accounts num-completed-bankings)
+           (start ()
+                  (letrec ((loop (lambda (i)
+                                   (if (= i NumBankings)
+                                       #t
+                                       (let* ((source-id (inexact->exact (floor (* (/ (random NumAccounts) 10) 8))))
+                                              (loop-id  (random (- NumAccounts source-id)))
+                                              (dest-id (+ source-id (if (= loop-id 0) 1 loop-id))))
+                                         (a/log "source-id: ~a~n" source-id)
+                                         (a/log "loop-id: ~a~n" loop-id)
+                                         (a/log "dest-id: ~a~n" dest-id)
+                                         (let ((source (vector-ref accounts source-id))
+                                               (dest (vector-ref accounts dest-id))
+                                               (amount (random 1000)))
+                                           (a/send source credit amount a/self dest))
+                                         (loop (+ i 1)))))))
+                    (loop 0)
+                    (a/become teller accounts num-completed-bankings)))
+           (reply ()
+                  (if (= (+ num-completed-bankings 1) NumBankings)
+                      (begin
+                        (vector-foreach (lambda (a) (a/send a stop)) accounts)
+                        (a/terminate))
+                      (a/become teller accounts (+ num-completed-bankings 1))))))
+
+(define account
+  (a/actor "account" (id balance)
+           (debit (amount creditor)
+                  (a/send creditor reply)
+                  (a/become account id (+ balance amount)))
+           (credit (amount sender recipient)
+                   (a/send recipient debit amount sender)
+                   ; (a/send master reply) ; modelled as an ask in Savina, here we let the debit operation send the reply (might not be safe?)
+                   (a/become account id (- balance amount)))
+           (stop ()
+                 (a/terminate))))
+
+(define master (a/create teller
+                         (build-vector NumAccounts (lambda (i) (a/create account i InitialBalance)))
+                         0))
+(a/send master start)
+(a/wait)

@@ -11,11 +11,6 @@
 (provide a/wait)
 (provide int-top)
 
-(define id -1)
-
-;(provide actor-names)
-;(provide thread-names)
-
 (define actor-names (make-hash)) ;; map actor (proc) -> name
 (define thread-names (make-hash)) ;; map thread -> name
 (define (abstract x)
@@ -28,17 +23,24 @@
         ((vector? x) "\"#<vector>\"")
         (else x)))
 (define recorded (make-hash)) ;; map thread - become/beh/args, create/beh/args, received/tag/args
+(define (thread-name t)
+  (if (hash-has-key? thread-names t)
+      (hash-ref thread-names t)
+      (begin
+        (log "CANNOT FIND VALUE FOR THREAD ~a~n" t)
+        t)))
 (define record-thread (thread (lambda ()
                                 (let loop ()
                                   (let* ((recv (thread-receive))
                                          (prev (if (hash-has-key? recorded (car recv)) (hash-ref recorded (car recv)) (set))))
+                                    (log "recording ~a~n" recv)
                                     (hash-set! recorded (car recv) (set-add prev (cdr recv))))
                                   (loop)))))
 (define (a/recorded-actors)
   (hash-keys recorded))
 (define (a/recorded actor)
   (list->set (set-map (hash-ref recorded actor) (lambda (x) (map force x)))))
-(define (int-top) (+ 2 (random 10)))
+(define (int-top) (+ 1 (random 5)))
 (define (display-recorded)
   (map (lambda (k)
          (printf "~a~n" (list k (set->list (a/recorded k)))))
@@ -59,11 +61,14 @@
     [self (current-thread)]))
 (define-syntax a/self-name
   (syntax-id-rules ()
-    [self (hash-ref thread-names a/self)]))
+    [self (thread-name a/self)]))
 (define-syntax-rule (a/send act msg arg1 ...)
   (begin
-    (log "[~a] send message ~a to ~a (running? ~a) ~n" a/self-name 'msg (hash-ref thread-names act) (thread-running? act))
-    (thread-send act (cons 'msg (list arg1 ...)))))
+    (log "[~a] >> send message ~a to ~a (running? ~a) (success? ~a)~n" a/self-name 'msg (thread-name act) (thread-running? act)
+         (if (not (thread-send act (cons 'msg (list arg1 ...)) #f)) "\033[31mNO\e[0m" "yes"))
+    ;; (thread-send act (cons 'msg (list arg1 ...)))
+    ;;(log "[~a] << sent~n" a/self-name)
+    ))
 (define-syntax bind-lists
   (syntax-rules ()
     [(bind-lists (x y ...) l body ...)
@@ -73,9 +78,8 @@
      (begin body ...)]))
 (define-syntax-rule (a/actor name (state ...) (msg (arg ...) body ...) ...)
   (let ((act (lambda (m state ...)
-    (log "send to record-thread ~a ~a~n" (thread-running? record-thread) (thread-dead? record-thread))
-    (thread-send record-thread (list a/self-name 'received (car m) (delay (map abstract (cdr m)))))
-    ;(log "actor ~a received ~a~n" name m)
+               (when (not (thread-send record-thread (list a/self-name 'received (car m) (delay (map abstract (cdr m)))) #f))
+                     (log "\033[31mERROR recording (a/actor)\e[0m~n"))
     (case (car m)
       ((msg) (bind-lists (arg ...) (cdr m)
                          (log "[~a] processing message ~a~a~n" name (car m) (map abstract (cdr m)))
@@ -88,15 +92,18 @@
 (define-syntax-rule (a/become act v1 ...)
   (begin
     (log "[~a] becoming ~a with ~a~n" a/self-name (hash-ref actor-names act) (map abstract (list v1 ...)))
-    (thread-send record-thread (list a/self-name 'become (hash-ref actor-names act) (delay (map abstract (list v1 ...)))))
+    (when (not
+           (thread-send record-thread (list a/self-name 'become (hash-ref actor-names act) (delay (map abstract (list v1 ...)))) #f))
+      (log "\033[31mERROR recording (a/become)\e[0m"))
     (act (thread-receive) v1 ...)))
 (define-syntax-rule (log fmt v ...)
-  (thread-send log-thread (format fmt v ...)))
+  (when (not (thread-send log-thread (format fmt v ...) #f))
+    (error "logging")))
 (define-syntax-rule (a/log v ...)
   (log v ...))
 (define-syntax-rule (a/terminate)
   (begin
-    (log "[~a] terminating~n" a/self-name)
+    (log "[~a] !!! \033[31mterminating\e[0m~n" a/self-name)
     (kill-thread (current-thread))))
 (define-syntax-rule (a/create act v1 ...)
   (let ((parent-name a/self-name)
@@ -104,7 +111,8 @@
     (let ((t (thread (lambda ()
               (hash-set! thread-names a/self (hash-ref actor-names act))
               ;; TODO: replace map abstract by just list, apply abstract when reading recorded values instead
-              (thread-send record-thread (list parent-name 'create (hash-ref actor-names act) (delay (map abstract values))))
+              (when (not (thread-send record-thread (list parent-name 'create (hash-ref actor-names act) (delay (map abstract values))) #f))
+                (log "\033[31mERROR recording (a/create)\e[0m"))
               (log "[~a] creating ~a with ~a ~n" parent-name (hash-ref actor-names act) (map abstract values))
               (apply act (cons (thread-receive) values))))))
       (sleep 0.1)
