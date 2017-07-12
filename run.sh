@@ -1,11 +1,12 @@
 #!/bin/sh
 
-ITERATIONS=5
+ITERATIONS=100
 
 run() {
     echo === $1 ===
-    for i in $(seq 5); do
-        racket $1.rkt | gawk '// { if (logging==1) { print $0 } } /exiting/ { logging=1 }' > $1.conc
+    rm $1.conc
+    for i in $(seq $ITERATIONS); do
+        racket $1.rkt | gawk '// { if (logging==1) { print $0 } } /exiting/ { logging=1 }' >> $1.conc
         if [ $? == 130 ]; then
            exit
         fi
@@ -16,10 +17,13 @@ run() {
     done
 }
 
-run pp
-run count
-run fjt
-run fjc
-run thr
-run cham
-run big
+run pp # good (0 overapproximations, no unsound)
+run count # good (0 overapproximations, no unsound)
+run fjt # good (0 overapproximations, no unsound)
+run fjc # good (0 overapproximations, no unsound)
+run thr # good (2 overapproximations every time)
+run cham # good (5 overapproximations every time)
+run big # good (2 overapproximations every time)
+
+run cdict # good (1 overapproximation every time)
+run csll # good (1 overapproximation every time)

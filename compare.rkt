@@ -7,8 +7,9 @@
         (let ((entry (read in)))
           (if (eof-object? entry)
               result
-              (begin
-                (hash-set! result (car entry) (list->set (cadr entry)))
+              (let ((key (car entry))
+                    (value (cadr entry)))
+                (hash-set! result key (set-union (if (hash-has-key? result key) (hash-ref result key) (set)) (list->set (cadr entry))))
                 (loop)))))
       (loop))))
 (define concrete-results (read-from-file (vector-ref (current-command-line-arguments) 0)))
@@ -24,8 +25,8 @@
          (set! match #f)
          ; (printf "mismatch for actor ~a: ~a (conc.) vs. ~a (abs.) ~n" k c a)
          ; (printf "conc - abs = ~a~n" (set-subtract c a))
-         (printf "overapproximates ~a element(s) on actor ~a~n" (set-count (set-subtract a c)) k)
+         (printf "[~a] overapproximates ~a element(s): ~a~n" k (set-count (set-subtract a c)) (set-subtract a c))
          (when (not (set-empty? (set-subtract c a)))
-           (printf "UNSOUND~n")))))
+           (printf "UNSOUND on actor ~a ~a~n" k (set-subtract c a))))))
    keys))
 (printf "result: ~a~n" match)

@@ -1,0 +1,4 @@
+(main ((create dictionary (())) (create master (#f dictionary {Int}))  ))
+(master ((create worker (master dictionary {Int} {Int})) (become master (#f dictionary {Int})) (become master ("#<vector>" dictionary {Int})) (received create-workers ()) (received end-work ())))
+(worker ( (become worker (master dictionary {Int} {Int})) (received do-work ()) (received result ({Int}))))
+(dictionary ( (become dictionary (())) (become dictionary ("#<list>")) (received read (worker {Int})) (received write (worker {Int} {Int})) (received end-work ())))

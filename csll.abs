@@ -1,0 +1,4 @@
+(main ((create sortedlist (())) (create master (#f sortedlist {Int}))  ))
+(master ((create worker (master sortedlist {Int} {Int})) (become master (#f sortedlist {Int})) (become master ("#<vector>" sortedlist {Int})) (received create-workers ()) (received end-work ())))
+(worker ( (become worker (master sortedlist {Int} {Int})) (received do-work ()) (received result ({Int})) (received result (#f)) (received result (#t))))
+(sortedlist ( (become sortedlist (())) (become sortedlist ("#<list>")) (received size (worker)) (received write (worker {Int})) (received contains (worker {Int})) (received end-work ())))
