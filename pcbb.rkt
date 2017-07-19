@@ -1,13 +1,9 @@
 #lang racket
 (require "actors.rkt")
 (define BufferSize (int-top))
-(define NumProducers 1; (int-top)
-  )
-(define NumConsumers 3;(int-top)
-  )
-(define NumItemsPerProducer 1;(int-top)
-  )
-(a/log "Producers: ~a, Consumers: ~a, Items: ~a~n" NumProducers NumConsumers NumItemsPerProducer)
+(define NumProducers (int-top))
+(define NumConsumers (int-top))
+(define NumItemsPerProducer (int-top))
 
 (define ConsCost 40)
 (define ProdCost 40)
@@ -50,15 +46,16 @@
                               (begin
                                 (a/send producer produce-data)
                                 (a/become manager producers consumers available-producers available-consumers (cons data pending-data) terminated-producers)))
-                          (begin
+                          (let ((available-producers
+                                 (if (> (length pending-data) AdjustedBufferSize)
+                                     (cons producer available-producers)
+                                     (begin
+                                       (a/send producer produce-data)
+                                       available-producers))))
                             (a/send (car available-consumers) data-item data)
                             (a/become manager producers consumers
-                                      (if (> (length pending-data) AdjustedBufferSize)
-                                          (cons producer available-producers)
-                                          (begin
-                                            (a/send producer produce-data)
-                                            available-producers))
-                                      available-consumers (cons data pending-data) terminated-producers))))
+                                      available-producers (cdr available-consumers)
+                                      (cons data pending-data) terminated-producers))))
            (consumer-available (consumer)
                                (if (null? pending-data)
                                    (if (and (= terminated-producers NumProducers) (= (+ 1 (length available-consumers)) NumConsumers))
@@ -75,6 +72,7 @@
                                          (a/become manager producers consumers available-producers available-consumers (cdr pending-data) terminated-producers)))))
            (exit () (if (and (= (+ 1 terminated-producers) NumProducers) (= (length available-consumers) NumConsumers))
                         (begin
+                          (a/log "available consumers: ~a~n " (length available-consumers))
                           (for-each (lambda (c) (a/send c exit)) consumers)
                           (a/terminate))
                         (a/become manager producers consumers available-producers available-consumers pending-data (+ 1 terminated-producers))))))

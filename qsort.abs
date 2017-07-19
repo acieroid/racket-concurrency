@@ -1,0 +1,18 @@
+(main ((create quicksort-actor (#f {Sym} () {Int}))  ))
+(quicksort-actor
+ ((create quicksort-actor (#f {Sym} () {Int}))
+  (create quicksort-actor (#f {Sym} "#<list>" {Int}))
+  (create quicksort-actor (quicksort-actor {Sym} () {Int}))
+  (create quicksort-actor (quicksort-actor {Sym} "#<list>" {Int}))
+  (become quicksort-actor (quicksort-actor {Sym} () {Int}))
+  (become quicksort-actor (quicksort-actor {Sym} "#<list>" {Int}))
+  (become quicksort-actor (#f {Sym} () {Int}))
+  (become quicksort-actor (#f {Sym} "#<list>" {Int}))
+  (received sort (()))
+  (received sort ("#<list>"))
+  (received result (() {Sym}))
+  (received result ("#<list>" {Sym}))))
+(quicksort-actor ())
+
+
+

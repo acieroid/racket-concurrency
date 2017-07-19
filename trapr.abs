@@ -1,0 +1,16 @@
+(main ((create master-actor (#f {Int} {Int})) (create worker-actor (master-actor {Int}))  ))
+(master-actor
+ ((become master-actor ("#<vector>" {Int} {Int}))
+  (become master-actor (#f {Int} {Int}))
+  (become master-actor ("#<vector>" {Int} {Real}))
+  (become master-actor (#f {Int} {Real}))
+  (received start ("#<vector>"))
+  (received work ({Int} {Int} {Int}))
+  (received result ({Real} {Int}))
+  (received result ({Int} {Int}))))
+(worker-actor (
+               (received work ({Int} {Int} {Int}))
+               (received work ({Int} {Real} {Int}))
+               (received work ({Real} {Int} {Int}))
+               (received work ({Real} {Real} {Int}))
+               ))
