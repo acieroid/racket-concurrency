@@ -33,15 +33,6 @@
 
 (define master-actor
   (a/actor "master-actor" (workers num-workers-terminated num-work-sent num-work-completed)
-           (start ()
-                  (a/become master-actor
-                            (build-vector NumWorkers (lambda (i)
-                                                       (let ((w (a/create worker-actor a/self i)))
-                                                         (if (= i 0)
-                                                             (a/send w work origin target)
-                                                             #t)
-                                                         w)))
-                            num-workers-terminated num-work-sent num-work-completed))
            (work (target node)
                  (a/send (vector-ref workers (modulo num-work-sent NumWorkers)) work target node)
                  (a/become master-actor workers num-workers-terminated (+ num-work-sent 1) num-work-completed))
@@ -68,7 +59,7 @@
     (loop 0 '())))
 
 (define worker-actor
-  (a/actor "worker-actor" (master id)
+  (a/actor "worker-actor" (id)
            (work (target node)
                  (letrec ((loop (lambda (queue nodes-processed)
                                   (if (or (null? queue) (= nodes-processed Threshold))
@@ -81,13 +72,24 @@
                                             (loop (append queue (neighbors loop-node)) (+ nodes-processed 1))))))))
                    (loop (cons node '()) 0))
                  (a/send master received)
-                 (a/become worker-actor master id))
+                 (a/become worker-actor id))
            (stop ()
                  (a/send master stop)
                  (a/terminate))))
 
 (define origin 0)
 (define target 10)
-(define master (a/create master-actor #f 0 0 0))
+(define master-actor-init
+  (a/actor "master-actor-init" ()
+           (start ()
+                  (a/become master-actor (build-vector NumWorkers (lambda (i)
+                                                                    (let ((w (a/create worker-actor i)))
+                                                                      (if (= i 0)
+                                                                          (a/send w work origin target)
+                                                                          #t)
+                                                                      w)))
+                            0 0 0))))
+(define master
+  (a/create master-actor-init))
 (a/send master start)
 (a/wait)
