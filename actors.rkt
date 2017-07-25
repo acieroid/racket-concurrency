@@ -15,13 +15,13 @@
 (define actor-names (make-hash)) ;; map actor (proc) -> name
 (define thread-names (make-hash)) ;; map thread -> name
 (define (abstract x)
-  (cond ((integer? x) '{Int})
-        ((real? x) '{Real})
+  (cond ((integer? x) '{Num})
+        ((real? x) '{Num})
         ((string? x) '{Str})
         ((symbol? x) '{Sym})
         ((thread? x) (if (hash-has-key? thread-names x) (string->symbol (hash-ref thread-names x)) "???"))
         ((procedure? x) (if (hash-has-key? actor-names x) (string->symbol (hash-ref actor-names x)) x))
-        ((list? x) (if (empty? x) '() (format "\"#<list>\"")))
+        ((list? x) "\"#<list>\"")
         ((vector? x) "\"#<vector>\"")
         (else x)))
 (define recorded (make-hash)) ;; map thread - become/beh/args, create/beh/args, received/tag/args
@@ -109,8 +109,9 @@
     ;;(act (thread-receive) v1 ...)
     ))
 (define-syntax-rule (log fmt v ...)
-  (when (not (thread-send log-thread (format fmt v ...) #f))
-    (error "logging")))
+  (when (not (thread-send log-thread (format fmt v ...) #f)) (error "logging"))
+  ;;(printf fmt v ...)
+  )
 (define-syntax-rule (a/log v ...)
   (log v ...))
 (define-syntax-rule (a/terminate)

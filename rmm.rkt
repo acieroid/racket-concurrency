@@ -67,8 +67,8 @@
   (a/actor "worker-actor" (master id)
            (work (srA scA srB scB srC scC num-blocks dim priority)
                  (if (> num-blocks BlockThreshold)
-                     (let* ((new-dim (/ dim 2))
-                            (new-num-blocks (/ num-blocks 4))
+                     (let* ((new-dim (inexact->exact (floor (/ dim 2))))
+                            (new-num-blocks (inexact->exact (floor (/ num-blocks 4))))
                             (new-priority (+ priority 1)))
                        (a/send master work
                                srA scA srB scB srC scC new-num-blocks new-dim new-priority)

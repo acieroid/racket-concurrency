@@ -19,10 +19,6 @@
   (let ((data-size (list-ref data-sizes N)))
     (random-matrix data-size data-size)))
 
-(define (guard n v)
-  (if (vector? v) v
-      (error (format "not a vector ~a" n))))
-
 (define (sor-runner-actor n)
   (let* ((s (list-ref data-sizes n))
          (part (inexact->exact (floor (/ s 2))))
@@ -37,10 +33,10 @@
                                                     (if (= j part) #t
                                                         (let ((pos (+ (* i (+ part 1)) j)))
                                                           (set! c (- 1 c))
-                                                          (vector-set! sor-actors pos (sor-actor pos (vector-ref (guard 1 (vector-ref (guard 2 A) i)) j)
+                                                          (vector-set! sor-actors pos (sor-actor pos (vector-ref (vector-ref A i) j)
                                                                                                  c s (+ part 1) omega self #f))
                                                           (if (= j (- part 1))
-                                                              (vector-set! my-border i (vector-ref (guard 3 sor-actors) pos))
+                                                              (vector-set! my-border i (vector-ref sor-actors pos))
                                                               #f)
                                                           (loop1j (+ j 1)))))))
                                    (loop1j 0)
@@ -50,7 +46,7 @@
                                (letrec ((loop2j (lambda (j)
                                                   (if (= j (- s part)) #t
                                                       (begin
-                                                        (vector-set! (vector-ref (guard 5 partial-matrix) i) j (vector-ref (guard 5 (vector-ref (guard 6 A) i)) (+ j part)))
+                                                        (vector-set! (vector-ref partial-matrix i) j (vector-ref (vector-ref A i) (+ j part)))
                                                         (loop2j (+ j 1)))))))
                                  (loop2j 0)
                                  (loop2i (+ i 1)))))))
@@ -72,7 +68,7 @@
                                (letrec ((loop1i (lambda (i)
                                                   (if (= i s) #t
                                                       (begin
-                                                        (vector-set! sor-actors (- (* (+ i 1) (+ part 1)) 1) (vector-ref (guard 7 mborder) i))
+                                                        (vector-set! sor-actors (- (* (+ i 1) (+ part 1)) 1) (vector-ref mborder i))
                                                         (loop1i (+ i 1))))))
                                         (loop2i (lambda (i)
                                                   (if (= i s)
@@ -81,14 +77,14 @@
                                                                          (if (= j part)
                                                                              #t
                                                                              (let ((pos (+ (* i (+ part 1)) j)))
-                                                                               (a/send (vector-ref (guard 8 sor-actors) pos) start jacobi-num-iter sor-actors)
+                                                                               (a/send (vector-ref sor-actors pos) start jacobi-num-iter sor-actors)
                                                                                (loop2j (+ j 1)))))))
                                                         (loop2j 0)
                                                         (loop2i (+ i 1)))))))
                                  (loop1i 0)
                                  (loop2i 0))
                                (a/become actor g-total returned total-msg-rcv expecting-boot)))))
-      (a/create actor 0.0 0 0 #t))))
+      (a/create actor 0 0 0 #t))))
 
 (define (sor-actor pos value color nx ny omega sor-source peer)
   (define (cal-pos x1 y1)
@@ -114,7 +110,7 @@
                              (start (mi mactors)
                                     (if (= color 1)
                                         (for-each (lambda (loop-neigh-index)
-                                                    (a/send (vector-ref (guard 15 mactors) loop-neigh-index) value value))
+                                                    (a/send (vector-ref mactors loop-neigh-index) value value))
                                                   neighbors)
                                         #f)
                                     (for-each (lambda (v) (a/send a/self sor-value v)) pending-messages)
@@ -126,7 +122,7 @@
                                             (if (< iter max-iter)
                                                 (if (= (+ received-vals 1) (length neighbors))
                                                     (begin
-                                                      (for-each (lambda (loop-neigh-index) (a/send (vector-ref (guard 9 sor-actors) loop-neigh-index) value value)) neighbors)
+                                                      (for-each (lambda (loop-neigh-index) (a/send (vector-ref sor-actors loop-neigh-index) value value)) neighbors)
                                                       (if (= (+ iter 1) max-iter)
                                                           (begin
                                                             (a/send sor-source result x y value msg-rcv)
@@ -136,7 +132,7 @@
                                                     (a/become actor value iter max-iter (+ msg-rcv 1) sor-actors (+ received-vals 1) (+ sum v) expecting-start pending-messages))
                                                 (a/terminate)
                                                 ))))))
-      (a/create actor value 0 0 0 #f 0 0.0 #t '()))))
+      (a/create actor value 0 0 0 #f 0 0 #t '()))))
 
 (define (sor-peer s part-start matrix-part border sor-source)
   (let ((sor-actors (make-vector (* s (+ (- s part-start) 1)) #f)))
@@ -145,7 +141,7 @@
         (letrec ((loop1 (lambda (i)
                           (if (= i s) #t
                               (begin
-                                (vector-set! sor-actors (* i (+ (- s part-start) 1)) (vector-ref (guard 10 border) i))
+                                (vector-set! sor-actors (* i (+ (- s part-start) 1)) (vector-ref border i))
                                 (loop1 (+ i 1))))))
                  (loop2i (lambda (i)
                            (if (= i s) #t
@@ -155,10 +151,10 @@
                                                         (let ((pos (+ (* i (+ (- s part-start) 1)) j)))
                                                           (set! c (- 1 c))
                                                           (vector-set! sor-actors pos
-                                                                       (sor-actor pos (vector-ref (guard 11 (vector-ref (guard 12 matrix-part) i)) (- j 1))
+                                                                       (sor-actor pos (vector-ref (vector-ref matrix-part i) (- j 1))
                                                                                   c s (+ (- s part-start) 1)
                                                                                   omega self #t))
-                                                          (if (= j 1) (vector-set! my-border i (vector-ref (guard 102 sor-actors) pos)) #f)
+                                                          (if (= j 1) (vector-set! my-border i (vector-ref sor-actors pos)) #f)
                                                           (loop2j (+ j 1)))))))
                                    (loop2j 1)
                                    (loop2i (+ i 1)))))))
@@ -167,7 +163,7 @@
                                (letrec ((loop3j (lambda (j)
                                                   (if (= j (+ (- s part-start) 1)) #t
                                                       (let ((pos (+ (* i (+ (- s part-start) 1)) j)))
-                                                        (a/send (vector-ref (guard 13 sor-actors) pos) start jacobi-num-iter sor-actors)
+                                                        (a/send (vector-ref sor-actors pos) start jacobi-num-iter sor-actors)
                                                         (loop3j (+ j 1)))))))
                                  (loop3j 1)
                                  (loop3i (+ i 1)))))))
@@ -178,14 +174,14 @@
     (letrec ((actor (a/actor "sor-peer" (g-total returned total-msg-rcv expecting-boot)
                              (boot ()
                                    (boot a/self)
-                                   (a/become g-total returned total-msg-rcv #f))
+                                   (a/become actor g-total returned total-msg-rcv #f))
                              (result (mx my mv msg-rcv)
                                      (if expecting-boot (error "not booted yet") #f)
                                      (if (= (+ returned 1) (* s (- s part-start)))
                                          (begin (a/send sor-source result -1 -1 g-total total-msg-rcv)
                                                 (a/terminate))
                                          (a/become actor (+ g-total mv) (+ returned 1) (+ total-msg-rcv msg-rcv) expecting-boot))))))
-      (a/create actor 0.0 0 0 #t))))
+      (a/create actor 0 0 0 #t))))
 
 (define sor-runner (sor-runner-actor N))
 (a/send sor-runner boot)

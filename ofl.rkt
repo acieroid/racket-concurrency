@@ -171,7 +171,8 @@
                                         (max-depth (max max-depth-of-known-open-facility depth)))
                                     ;; notifyParentOfFacility(...)
                                     (if parent
-                                        (a/send parent facility position-relative-to-parent facility depth #t)
+                                        ;; notifyParentOfFacility(p, depth) -> ! position-relative-to-parent depth p #t
+                                        (a/send parent facility position-relative-to-parent depth facility #t)
                                         #f)
                                     (a/log "facility: ~a~n" facility)
                                     (let ((first-boundary (box (box-x1 boundary) (point-y facility) (point-x facility) (box-y2 boundary)))

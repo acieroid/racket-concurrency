@@ -12,7 +12,4 @@
   (received sort ("#<list>"))
   (received result (() {Sym}))
   (received result ("#<list>" {Sym}))))
-(quicksort-actor ())
-
-
 
