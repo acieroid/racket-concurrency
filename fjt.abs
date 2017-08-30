@@ -1,2 +1,2 @@
-(main ((create throughput ({Int}))  ))
-(throughput ( (become throughput ({Int})) (received message ())))
+(main ((create throughput ({Num}))  ))
+(throughput ( (become throughput ({Num})) (received message ())))

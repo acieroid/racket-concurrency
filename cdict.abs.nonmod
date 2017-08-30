@@ -1,9 +1,8 @@
-(main ((create dictionary ("#<list>")) (create master (#f dictionary {Num}))  ))
+(main ((create dictionary ("#<list>"))
+       (create master (#f dictionary {Num}))  ))
 (master ((create worker (master dictionary {Num} {Num}))
-
          (become master (#f dictionary {Num}))
          (become master ("#<vector>" dictionary {Num}))
-
          (received create-workers ())
          (received end-work ())))
 (worker ((become worker (master dictionary {Num} {Num}))

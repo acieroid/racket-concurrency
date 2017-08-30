@@ -43,13 +43,6 @@
 
 (define root-actor
   (a/actor "root-actor" (height size children has-grant-children traversed final-size-printed)
-           (generate-tree ()
-                          (let* ((height2 (+ height 1))
-                                 (size2 (+ size BinomialParam))
-                                 (computation-size (get-next-normal AvgCompSize StdDevCompSize))
-                                 (children2 (build-vector BinomialParam (lambda (i) (a/create node-actor a/self a/self height (+ size i) computation-size #f 0 #f #f (make-vector BinomialParam #f))))))
-                            (vector-foreach (lambda (a) (a/send a try-generate-children)) children2)
-                            (a/become root-actor height2 size2 children2 (make-vector BinomialParam #f) traversed final-size-printed)))
            (update-grant (child-id)
                          (vector-set! has-grant-children child-id #t)
                          (a/become root-actor height size children has-grant-children traversed final-size-printed))
@@ -74,17 +67,28 @@
                          (vector-foreach (lambda (a) (a/send a terminate)) children)
                          (a/terminate))))
 
-(define node-actor
-  (a/actor "node-actor" (parent root height id comp-size is-urgent urgent-child has-children children has-grant-children)
+(define root-actor-init
+  (a/actor "root-actor-init" (height size has-grant-children traversed final-size-printed)
+           (generate-tree ()
+                          (let* ((height2 (+ height 1))
+                                 (size2 (+ size BinomialParam))
+                                 (computation-size (get-next-normal AvgCompSize StdDevCompSize))
+                                 (children2 (build-vector BinomialParam (lambda (i) (a/create node-actor-init a/self a/self height (+ size i) computation-size #f 0 #f (make-vector BinomialParam #f))))))
+                            (vector-foreach (lambda (a) (a/send a try-generate-children)) children2)
+                            (a/become root-actor height2 size2 children2 (make-vector BinomialParam #f) traversed final-size-printed)))))
+
+
+(define node-actor-init
+  (a/actor "node-actor-init"  (parent root height id comp-size is-urgent urgent-child has-children has-grant-children)
            (try-generate-children ()
                                   (wait-loop 100 40000)
                                   (a/send root should-generate-children a/self height)
-                                  (a/become node-actor parent root height id comp-size is-urgent urgent-child has-children children has-grant-children))
+                                  (a/become node-actor-init parent root height id comp-size is-urgent urgent-child has-children has-grant-children))
            (generate-children (current-id children-comp-size)
                               (let* ((array-id (modulo id BinomialParam))
                                      (children-height (+ height 1))
                                      (children2 (build-vector BinomialParam (lambda (i)
-                                                                              (let ((c (a/create node-actor a/self root children-height (+ current-id 1) children-comp-size #f 0 #f #f (make-vector BinomialParam #f))))
+                                                                              (let ((c (a/create node-actor-init a/self root children-height (+ current-id 1) children-comp-size #f 0 #f (make-vector BinomialParam #f))))
                                                                                 (a/send c try-generate-children)
                                                                                 c)))))
                                 (a/send parent update-grant array-id)
@@ -93,11 +97,14 @@
                                      (let* ((array-id (modulo id BinomialParam))
                                             (children-height (+ height 1))
                                             (children2 (build-vector BinomialParam (lambda (i)
-                                                                                     (let ((c (a/create node-actor a/self root children-height (+ current-id 1) children-comp-size (= i urgent-child-id) 0 #f #f (make-vector BinomialParam #f))))
+                                                                                     (let ((c (a/create node-actor-init a/self root children-height (+ current-id 1) children-comp-size (= i urgent-child-id) 0 #f (make-vector BinomialParam #f))))
                                                                                        (a/send c try-generate-children)
                                                                                        c)))))
                                        (a/send parent update-grant array-id)
-                                       (a/become node-actor parent root height id comp-size is-urgent urgent-child-id #t children2 has-grant-children)))
+                                       (a/become node-actor parent root height id comp-size is-urgent urgent-child-id #t children2 has-grant-children)))))
+
+(define node-actor
+  (a/actor "node-actor" (parent root height id comp-size is-urgent urgent-child has-children children has-grant-children)
            (update-grant (child-id)
                                  (vector-set! has-grant-children child-id #t)
                                  (a/become node-actor parent root height id comp-size is-urgent urgent-child has-children children has-grant-children))
@@ -132,6 +139,6 @@
                           #t)
                       (a/terminate))))
 (define root
-  (a/create root-actor 1 1 #f (make-vector BinomialParam #f) #f #f))
+  (a/create root-actor-init 1 1 #f #f #f))
 (a/send root generate-tree)
 (a/wait)

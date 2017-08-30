@@ -1,11 +1,14 @@
 #lang racket
 (require "actors.rkt")
-(define Capacity (int-top))
-(define Haircuts (int-top))
+;(define Capacity (int-top))
+                                        ;(define Haircuts (int-top))
+(define Capacity 5)
+(define Haircuts 15)
 
 (define waiting-room
   (a/actor "waiting-room" (waiting-customers barber-asleep)
            (enter (customer)
+                  (a/log "waiting customers: ~a, Capacity: ~a~n" (length waiting-customers) Capacity)
                   (if (= (length waiting-customers) Capacity)
                       (begin
                         (a/send customer full)

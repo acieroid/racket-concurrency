@@ -1,0 +1,2 @@
+(main ((create forkjoin ())  ))
+(forkjoin (  (received message ())))

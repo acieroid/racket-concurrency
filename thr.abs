@@ -1,2 +1,2 @@
-(main ((create thread-ring ({Int} {Int} #f))  ))
-(thread-ring ((become thread-ring ({Int} {Int} thread-ring)) (become thread-ring ({Int} {Int} #f)) (received ping ({Int})) (received data (thread-ring)) (received data (#f)) (received exit ({Int}))))
+(main ((create thread-ring ({Num} {Num} #f))  ))
+(thread-ring ((become thread-ring ({Num} {Num} thread-ring)) (become thread-ring ({Num} {Num} #f)) (received ping ({Num})) (received data (thread-ring)) (received data (#f)) (received exit ({Num}))))

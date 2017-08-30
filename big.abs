@@ -1,3 +1,13 @@
-(main ((create sink ({Int} #f)) (create big ({Int} {Int} sink {Int} #f))  ))
-(sink ( (become sink ({Int} #f)) (become sink ({Int} "#<vector>")) (received neighbors ("#<vector>")) (received exit ())))
-(big ( (become big ({Int} {Int} sink {Int} #f)) (become big ({Int} {Int} sink {Int} "#<vector>")) (received neighbors ("#<vector>")) (received pong ({Int})) (received ping ({Int})) (received exit ())))
+(main ((create sink ({Int} {#f})) (create big ({Int} {Int} sink {Int} {#f}))  ))
+(sink ((become sink ({Int} {{#f,#<vector>}}))
+       (received neighbors ({#<vector>}))
+       (received exit ())))
+(big ((become big ({Int} {Int} sink {Int} {{#f,#<vector>}}))
+      (received neighbors ({#<vector>}))
+      (received pong ({Int}))
+      (received ping ({Int})) (received exit ())))
+
+
+(main ((create sink ({Num} #f)) (create big ({Num} {Num} sink {Num} #f))  ))
+(sink ( (become sink ({Num} #f)) (become sink ({Num} "#<vector>")) (received neighbors ("#<vector>")) (received exit ())))
+(big ( (become big ({Num} {Num} sink {Num} #f)) (become big ({Num} {Num} sink {Num} "#<vector>")) (received neighbors ("#<vector>")) (received pong ({Num})) (received ping ({Num})) (received exit ())))

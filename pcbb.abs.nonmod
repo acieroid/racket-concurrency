@@ -1,15 +1,13 @@
 (main ((create manager ("#<list>" "#<list>" "#<list>" "#<list>" "#<list>" {Num}))  ))
-
 (manager ((create producer ({Num} manager {Num} {Num}))
           (create consumer ({Num} manager {Num}))
           (become manager ("#<list>" "#<list>" "#<list>" "#<list>" "#<list>" {Num}))
           (received start ())
-          (received exit ())
           (received data-item (producer {Num}))
+          (received exit ())
           (received consumer-available (consumer))))
 (producer ((become producer ({Num} manager {Num} {Num}))
            (received produce-data ())))
 (consumer ((become consumer ({Num} manager {Num}))
            (received data-item ({Num}))
            (received exit ())))
-

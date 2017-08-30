@@ -1,12 +1,11 @@
-(main ((create apsp-actor ("#<list>" {Int} "#<list>" #f "#<vector>"))  ))
+(main ((create apsp-actor ("#<list>" {Num} "#<list>" #f "#<vector>"))  ))
 (apsp-actor
- ((create apsp-actor ("#<list>" {Int} "#<list>" #t "#<vector>"))
-  (create apsp-actor ("#<list>" {Int} "#<list>" #f "#<vector>"))
+ ((create apsp-actor ("#<list>" {Num} "#<list>" #t "#<vector>"))
+  (create apsp-actor ("#<list>" {Num} "#<list>" #f "#<vector>"))
 
-  (become apsp-actor ("#<list>" {Int} "#<list>" #t "#<vector>"))
-  (become apsp-actor ("#<list>" {Int} "#<list>" #f "#<vector>"))
+  (become apsp-actor ("#<list>" {Num} "#<list>" #t "#<vector>"))
+  (become apsp-actor ("#<list>" {Num} "#<list>" #f "#<vector>"))
 
   (received neighbor ("#<list>"))
   (received initial ())
-  (received result ({Int} {Int} "#<vector>"))))
-
+  (received result ({Num} {Num} "#<vector>"))))

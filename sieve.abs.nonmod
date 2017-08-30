@@ -1,0 +1,8 @@
+(main ((create number-producer-actor ())
+       (create prime-filter-actor ({Num} {Num} #f "#<list>" {Num}))))
+(prime-filter-actor ((create prime-filter-actor ({Num} {Num} #f "#<list>" {Num}))
+                     (become prime-filter-actor ({Num} {Num} #f "#<list>" {Num}))
+                     (become prime-filter-actor ({Num} {Num} prime-filter-actor "#<list>" {Num}))
+                     (received candidate ({Num}))
+                     (received exit ())))
+(number-producer-actor (  (received prime-filter (prime-filter-actor))))

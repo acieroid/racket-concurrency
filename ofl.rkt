@@ -2,7 +2,6 @@
 (require "actors.rkt")
 (define Alpha 2.0)
 (define CutoffDepth (int-top))
-(define Seed (int-top))
 (define GridSize (int-top)) ;; was 500
 (define F (* (sqrt 2) GridSize))
 (define NumPoints (int-top))
@@ -21,18 +20,17 @@
       (if (f (car l))
           (cons (car l) (filter f (cdr l)))
           (filter f (cdr l)))))
+
 (define (for-each f l)
   (if (null? l)
       #t
       (if (pair? l)
           (begin (f (car l)) (for-each f (cdr l)))
           (error "Cannot for-each over a non-list"))))
-
 ;; Points
 (define (point x y)
   (list 'point x y))
 (define (point-x p)
-  (a/log "(point-x ~a)~n" p)
   (cadr p))
 (define (point-y p)
   (caddr p))
@@ -50,7 +48,6 @@
 ;;                          (point (/ sum-x num-points) (/ sum-y num-points)))))))
 ;;     (loop points 0 0)))
 (define (get-distance p1 p2)
-  (a/log "(get-distance ~a ~a)~n" p1 p2)
   (let ((x-diff (- (point-x p1) (point-x p2)))
         (y-diff (- (point-y p1) (point-y p2))))
     (sqrt (+ (* x-diff x-diff) (* y-diff y-diff)))))
@@ -59,15 +56,12 @@
 (define (box x1 y1 x2 y2)
   (list 'box x1 y1 x2 y2))
 (define (box-x1 box)
-  (a/log "(box-x1 ~a)~n" box)
   (cadr box))
 (define (box-y1 box) (caddr box))
 (define (box-x2 box) (cadddr box))
 (define (box-y2 box)
-  (a/log "(box-y2 ~a)~n" box)
   (cadr (cdddr box)))
 (define (box-contains box p)
-  (a/log "(box-contains ~a ~a)~n" box p)
   (and (<= (box-x1 box) (point-x p))
        (<= (box-y1 box) (point-y p))
        (<= (point-x p) (box-x2 box))
@@ -118,24 +112,24 @@
       #f)
   (a/terminate))
 
-(define (create-child boundary position customers threshold depth local-facilities known-facilities max-depth)
+(define (create-child self boundary position customers threshold depth local-facilities known-facilities max-depth)
   (let ((customers (filter (lambda (c) (box-contains boundary c)) customers)))
-    (a/create quadrant-actor a/self position boundary threshold (+ depth 1)
+    (a/create quadrant-actor self position boundary threshold (+ depth 1)
               local-facilities known-facilities max-depth customers
               '() ;; children
               '() ;; children boundaries
               0 ;; children facilities
               0 ;; facility customers
               0 ;; terminated child count
-              (foldl (lambda (c acc) (+ acc (foldl (lambda (result fac)
-                                                     (a/log "create-child: fac: ~a~n" fac)
-                                                     (let ((distance (get-distance fac point)))
-                                                       (if (< distance result)
-                                                           distance
-                                                           result)))
-                                                   0
-                                                   local-facilities)))
-                     customers 0.0))))
+              (foldl (lambda (c acc)
+                       (+ acc (foldl (lambda (result fac)
+                                       (let ((distance (get-distance fac c)))
+                                         (if (< distance result)
+                                             distance
+                                             result)))
+                                     0
+                                     local-facilities)))
+                     0.0 customers))))
 (define quadrant-actor
   (a/actor "quadrant-actor"
            (parent position-relative-to-parent boundary threshold
@@ -167,22 +161,20 @@
                                                local-facilities)))
                               (if (> (+ total-cost cost) threshold)
                                   ;; partition
-                                  (let ((facility (mid-point bounding-box))
+                                  (let ((facility (mid-point boundary))
                                         (max-depth (max max-depth-of-known-open-facility depth)))
                                     ;; notifyParentOfFacility(...)
                                     (if parent
-                                        ;; notifyParentOfFacility(p, depth) -> ! position-relative-to-parent depth p #t
                                         (a/send parent facility position-relative-to-parent depth facility #t)
                                         #f)
-                                    (a/log "facility: ~a~n" facility)
                                     (let ((first-boundary (box (box-x1 boundary) (point-y facility) (point-x facility) (box-y2 boundary)))
                                           (second-boundary (box (point-x facility) (point-y facility) (box-x2 boundary) (box-y2 boundary)))
                                           (third-boundary (box (box-x1 boundary) (box-y1 boundary) (point-x facility) (point-y facility)))
                                           (fourth-boundary (box (point-x facility) (box-y1 boundary) (box-x2 boundary) (point-y facility))))
-                                      (let ((first-child (create-child first-boundary TopLeft customers threshold depth local-facilities known-facilities max-depth))
-                                            (second-child (create-child second-boundary TopRight customers threshold depth local-facilities known-facilities max-depth))
-                                            (third-child (create-child third-boundary BotLeft customers threshold depth local-facilities known-facilities max-depth))
-                                            (fourth-child (create-child fourth-boundary BotRight customers threshold depth local-facilities known-facilities max-depth)))
+                                      (let ((first-child (create-child a/self first-boundary TopLeft customers threshold depth local-facilities known-facilities max-depth))
+                                            (second-child (create-child a/self second-boundary TopRight customers threshold depth local-facilities known-facilities max-depth))
+                                            (third-child (create-child a/self third-boundary BotLeft customers threshold depth local-facilities known-facilities max-depth))
+                                            (fourth-child (create-child a/self fourth-boundary BotRight customers threshold depth local-facilities known-facilities max-depth)))
                                         (a/become quadrant-actor parent
                                                   position-relative-to-parent boundary threshold
                                                   depth local-facilities known-facilities max-depth
@@ -251,7 +243,7 @@
                                           total-cost)
                             )))
             (request-exit ()
-                          (if (null? children)
+                          (if (not (null? children))
                               (begin
                                 (for-each (lambda (loop-child) (a/send loop-child request-exit)) children)
                                 (a/become quadrant-actor parent

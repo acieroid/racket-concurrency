@@ -1,11 +1,27 @@
 #lang racket
 (require "actors.rkt")
-
 (define data-sizes
   (list 2 8 10 12 15 20 25 30 35 40 20 80 100 120 150 200 250 300 350 400))
-(define jacobi-num-iter 10)
+(define jacobi-num-iter (int-top))
 (define omega 1.25)
-(define N 0)
+(define N (int-top))
+
+(define (build-vector n f)
+  (letrec ((v (make-vector n #f))
+           (loop (lambda (i)
+                   (if (< i n)
+                       (begin
+                         (vector-set! v i (f i))
+                         (loop (+ i 1)))
+                       v))))
+    (loop 0)))
+
+(define (for-each f l)
+  (if (null? l)
+      #t
+      (if (pair? l)
+          (begin (f (car l)) (for-each f (cdr l)))
+          (error "Cannot for-each over a non-list"))))
 
 (define (perform-computation theta)
   (let* ((sint (sin theta))
