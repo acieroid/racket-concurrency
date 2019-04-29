@@ -121,6 +121,7 @@
 (define-syntax-rule (a/create act v1 ...)
   (let ((parent-name a/self-name)
         (values (list v1 ...)))
+    (printf "creating actor ~a with ~a arguments~n" act (length (list v1 ...)))
     (let ((t (thread (lambda ()
               (hash-set! thread-names a/self (actor-name act))
               ;; TODO: replace map abstract by just list, apply abstract when reading recorded values instead
