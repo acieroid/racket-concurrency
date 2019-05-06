@@ -1,0 +1,2 @@
+(main ((create 57.15)  (read 20.62 "#<list>") (read 16.25 "#<list>") (write 20.62 "#<list>") (write 16.25 "#<list>") (acquire 20.43) (acquire 17.24) (release 20.43) (release 17.24)))
+(57.15 ((create 57.15)  (read 20.62 "#<list>") (read 16.25 "#<list>") (write 20.62 "#<list>") (write 16.25 "#<list>") (acquire 20.43) (acquire 17.24) (release 20.43) (release 17.24)))

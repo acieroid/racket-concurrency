@@ -1,0 +1,2 @@
+(main ((create 157.36) (join 157.36) (read 54.11 #t) (read 54.11 #f) (read 52.11 #f) (read 52.11 #t) (write 54.11 #t) (write 54.11 #f) (acquire 56.5) (release 56.5)))
+(157.36 ((read 54.11 #t) (read 54.11 #f) (read 52.11 #f) (read 52.11 #t) (write 52.11 #f) (write 52.11 #t) (write 54.11 #f) (write 54.11 #t) (acquire 56.5) (release 56.5)))

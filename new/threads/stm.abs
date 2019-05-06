@@ -1,0 +1,6 @@
+;; Without thread-sensitivity
+;; (main ((create 171.46) (join 171.46) (read 22.16 Num) (read 22.16 "#<list>") (write 22.16 "#<list>") (write 22.16 Num) (acquire 23.10) (release 23.10)))
+;; (171.46 ((create 171.46) (join 171.46) (read 22.16 "#<list>") (read 22.16 Num) (write 22.16 "#<list>") (write 22.16 Num) (acquire 104.22) (acquire 23.10) (release 104.22) (release 23.10)))
+
+(main ((create 171.46) (join 171.46) (read 22.16 Num) (read 22.16 "#<list>")  ))
+(171.46 (  (read 22.16 Num) (read 22.16 "#<list>") (write 22.16 "#<list>") (write 22.16 Num) (acquire 23.10) (acquire 104.22) (release 23.10) (release 104.22)))

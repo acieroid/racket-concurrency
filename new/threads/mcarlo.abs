@@ -1,0 +1,3 @@
+(main ((create 26.27) (create 27.27) (join 26.27) (join 27.27)    ))
+(26.27 ((create 26.27) (create 27.27) (join 26.27) (join 27.27)    ))
+(27.27 ((create 26.27) (create 27.27) (join 26.27) (join 27.27)    ))

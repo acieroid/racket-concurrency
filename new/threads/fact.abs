@@ -1,0 +1,11 @@
+;; (main ((create 62.24) (create 65.24) (join 62.24) (join 65.24) (read 63.25 Num)   ))
+;; (44.30 ((create 44.30) (join 44.30)    ))
+;; (65.24 ((create 57.23) (join 57.23) (read 63.25 Num) (write 63.25 Num) (acquire 64.24) (release 64.24)))
+;; (62.24 ((create 44.30) (join 44.30)    ))
+;; (57.23 ((create 57.23) (join 57.23) (read 63.25 Num) (write 63.25 Num) (acquire 64.24) (release 64.24)))
+
+(57.23 ((create 57.23) (create 44.30) (join 44.30) (join 57.23) (read 63.25 Num) (write 63.25 Num) (acquire 64.24) (release 64.24)))
+(65.24 ((create 57.23) (create 44.30) (join 44.30) (join 57.23) (read 63.25 Num) (write 63.25 Num) (acquire 64.24) (release 64.24)))
+(62.24 ((create 44.30) (create 57.23) (join 44.30) (join 57.23)    ))
+(44.30 ((create 57.23) (create 44.30) (join 44.30) (join 57.23)    ))
+(main ((create 62.24) (create 65.24) (join 62.24) (join 65.24) (read 63.25 Num)   ))

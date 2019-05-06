@@ -1,0 +1,2 @@
+(main ((create 51.37) (join 51.37)    ))
+(51.37 (  (read 37.21 Num) (write 37.21 Num) (acquire 36.14) (release 36.14)))

@@ -1,0 +1,14 @@
+Exploration of different concurrency models in racket, targeted at evaluating static analyses.
+
+The actors.rkt defines the following primitives to support actors:
+a/actor, a/send, a/self, a/become, a/terminate, a/wait
+
+The following actors benchmarks are included:
+  - TODO
+
+The threads.rkt defines the following primitives to support threads:
+t/spawn, t/join, t/new-lock, t/acquire, t/release, t/ref, t/ref-set, t/deref
+
+The following threads benchmarks are included:
+  - TODO
+

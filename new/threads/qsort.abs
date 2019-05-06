@@ -1,0 +1,3 @@
+(main ((create 60.33) (create 61.34) (join 60.33) (join 61.34) (read 27.41 Num) (write 27.41 Num)  ))
+(60.33 ((create 60.33) (create 61.34) (join 60.33) (join 61.34) (read 27.41 Num) (write 27.41 Num)  ))
+(61.34 ((create 60.33) (create 61.34) (join 60.33) (join 61.34) (read 27.41 Num) (write 27.41 Num)  ))

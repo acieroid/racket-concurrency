@@ -1,0 +1,2 @@
+(main ((create 112.22) (join 112.22) (read 65.1 "#<list>") (read 65.1 "#<list>")   ))
+(112.22 (  (read 65.1 "#<list>") (read 65.1 "#<list>") (write 65.1 "#<list>") (acquire 67.28) (release 67.28)))

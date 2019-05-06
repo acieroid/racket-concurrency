@@ -1,0 +1,7 @@
+;; (main ((create 151.33) (create 152.33) (join 151.33) (join 152.33)    ))
+;; (152.33 ((create 129.45) (join 129.45) (read 95.28 "#<list>") (read 95.28 Num) (read 96.28 Num) (write 95.28 "#<list>") (write 95.28 Num) (write 96.28 Num) (acquire 97.22) (release 97.22)))
+;; (129.45 ( (read 96.28 Num) (write 95.28 "#<list>") (write 95.28 Num) (write 96.28 Num) (acquire 97.22) (release 97.22)))
+
+(main ((create 151.33) (create 152.33) (join 151.33) (join 152.33)    ))
+(152.33 ((create 129.45) (join 129.45) (read 95.28 "#<list>") (read 95.28 Num) (read 96.28 Num) (write 96.28 Num) (write 95.28 "#<list>") (write 95.28 Num) (acquire 97.22) (release 97.22)))
+(129.45 ((read 96.28 Num) (write 96.28 Num) (write 95.28 "#<list>") (write 95.28 Num) (acquire 97.22) (release 97.22)))

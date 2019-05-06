@@ -1,0 +1,2 @@
+(main ((create 31.40) (join 31.40) (read 36.38 Num) (read 36.60 Num)   ))
+(31.40 (   (write 36.38 Num) (write 36.60 Num)  ))

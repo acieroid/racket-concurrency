@@ -1,0 +1,2 @@
+(main ((create 130.40) (join 130.40) (read 29.54 Num) (read 28.65 Num) (read 27.74 Num) (read 28.54 Num) (read 27.54 Num) (read 28.76 Num) (read 27.64 Num) (write 28.65 Num) (write 28.54 Num) (write 28.76 Num)  ))
+(130.40 (  (read 29.54 Num) (read 28.65 Num) (read 27.74 Num) (read 28.54 Num) (read 27.54 Num) (read 28.76 Num) (read 27.64 Num) (write 28.76 Num) (write 27.64 Num) (write 28.54 Num) (write 27.54 Num) (write 28.65 Num) (write 27.74 Num)  ))
